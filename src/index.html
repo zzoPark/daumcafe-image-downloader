@@ -1,46 +1,85 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>다음 카페 댓글 이미지 다운로더</title>
-  </head>
-  <body>
-    <form class="container-fluid needs-validation" novalidate>
-      <fieldset class="m-3">
-        <label class="form-label">게시판 주소를 붙여넣으세요.</label>
-        <input name="url" type="text" class="form-control" placeholder="https://cafe.daum.net/SHINeemusic0525/example" autofocus required>
-        <div class="invalid-feedback">필수 입력</div>
-      </fieldset>
-      <fieldset class="m-3">
-        <label class="form-label">댓글 이미지를 다운받을 게시글 번호 범위를 입력하세요.</label>
-        <div class="row">
-          <div class="col-auto">
-            <input name="begin" class="form-control" type="number" min="1" placeholder="1" required>
-            <div class="invalid-feedback">필수 입력</div>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>다음 카페 댓글 이미지 다운로더</title>
+</head>
+
+<body>
+  <form id="form" class="container-fluid needs-validation" novalidate>
+    <fieldset class="m-3">
+      <label class="form-label">게시판 주소를 붙여넣으세요.</label>
+      <input name="url" type="text" class="form-control" placeholder="https://cafe.daum.net/SHINeemusic0525/example"
+        autofocus required>
+      <div class="invalid-feedback">필수 입력</div>
+    </fieldset>
+    <fieldset class="m-3">
+      <label class="form-label">댓글 이미지를 다운받을 게시글 번호 범위를 입력하세요.</label>
+      <div class="row">
+        <div class="col-auto">
+          <input name="begin" class="form-control" type="number" min="1" placeholder="시작" required>
+          <div class="invalid-feedback">필수 입력</div>
+        </div>
+        <div class="col-auto">~</div>
+        <div class="col-auto">
+          <input name="end" class="form-control" type="number" min="1" placeholder="끝" required>
+          <div class="invalid-feedback">필수 입력</div>
+        </div>
+      </div>
+    </fieldset>
+    <fieldset class="m-3">
+      <label class="form-label">다운로드에서 제외할 게시글 번호 범위를 입력하세요.</label>
+      <div class="row">
+        <div class="col-auto"><input name="excludeBegin" class="form-control" type="number" min="1" placeholder="시작">
+        </div>
+        <div class="col-auto">~</div>
+        <div class="col-auto"><input name="excludeEnd" class="form-control" type="number" min="1" placeholder="끝">
+        </div>
+      </div>
+    </fieldset>
+    <fieldset class="m-3">
+      <div id="alertPlaceholder"></div>
+      <button id="download" class="btn btn-primary" type="submit">
+        <span class="spinner-border spinner-border-sm visually-hidden" role="status" aria-hidden="true"></span>
+        다운로드 시작
+      </button>
+      <button class="btn btn-secondary" type="reset">초기화</button>
+    </fieldset>
+  </form>
+
+  <div id="modal" class="modal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-scrollable modal-fullscreen">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">다운로드 결과</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="nav nav-pills nav-justified" role="tablist">
+            <button class="nav-link active" id="nav-success-tab" data-bs-toggle="tab" data-bs-target="#nav-success" type="button" role="tab" aria-controls="nav-success" aria-selected="true">
+              성공 <span class="badge text-bg-success">0</span>
+            </button>
+            <button class="nav-link" id="nav-danger-tab" data-bs-toggle="tab" data-bs-target="#nav-danger" type="button" role="tab" aria-controls="nav-danger" aria-selected="false">
+              실패 <span class="badge text-bg-danger">0</span>
+            </button>
           </div>
-          <div class="col-auto">~</div>
-          <div class="col-auto">
-            <input name="end" class="form-control" type="number" min="1" placeholder="100" required>
-            <div class="invalid-feedback">필수 입력</div>
+          <div class="tab-content" id="nav-tabContent">
+            <div class="tab-pane fade show active" id="nav-success" role="tabpanel" aria-labelledby="nav-success-tab" tabindex="0">
+              <ul class="list-group list-group-flush"></ul>
+            </div>
+            <div class="tab-pane fade" id="nav-danger" role="tabpanel" aria-labelledby="nav-danger-tab" tabindex="0">
+              <ul class="list-group list-group-flush"></ul>
+            </div>
           </div>
         </div>
-      </fieldset>
-      <fieldset class="m-3">
-        <label class="form-label">다운로드에서 제외할 게시글 번호 범위를 입력하세요.</label>
-        <div class="row">
-          <div class="col-auto"><input name="excludeBegin" class="form-control" type="number" min="1" placeholder="10"></div>
-          <div class="col-auto">~</div>
-          <div class="col-auto"><input name="excludeEnd" class="form-control" type="number" min="1" placeholder="20"></div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">확인</button>
         </div>
-      </fieldset>
-      <fieldset class="m-3">
-        <div id="liveAlertPlaceholder"></div>
-        <button id="download" class="btn btn-primary" type="submit">
-          <span class="spinner-border spinner-border-sm visually-hidden" role="status" aria-hidden="true"></span>
-          다운로드 시작
-        </button>
-      </fieldset>
-    </form>
-  </body>
+      </div>
+    </div>
+  </div>
+</body>
+
 </html>

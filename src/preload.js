@@ -3,5 +3,14 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('electronAPI', {
-  downloadImages: (url, begin, end, excludeBegin, excludeEnd) => ipcRenderer.invoke('download-images', url, begin, end, excludeBegin, excludeEnd),
+  downloadImages: (url, begin, end, excludeBegin, excludeEnd) =>
+    ipcRenderer.invoke(
+      'download-images',
+      url,
+      begin,
+      end,
+      excludeBegin,
+      excludeEnd
+    ),
+  onShowFinished: (callback) => ipcRenderer.on('show-finished', callback),
 });

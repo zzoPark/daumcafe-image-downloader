@@ -1,9 +1,8 @@
 import puppeteer from 'puppeteer';
 import fs from 'fs';
 import https from 'https';
-import { promisify } from 'util';
 
-const downloadDir = './download/';
+const downloadDir = './download';
 
 function createSequences(begin, end, excludes = []) {
   const seqs = [];
@@ -13,9 +12,15 @@ function createSequences(begin, end, excludes = []) {
   }
   return seqs;
 }
+
 /**
  * @param {Electron.IpcMainInvokeEvent} event
- * 
+ * @param {string} prefixURL
+ * @param {number} begin
+ * @param {number} end
+ * @param {number} excludeBegin
+ * @param {number} excludeEnd
+ * @author zzoPark
  */
 export default async function downloadImages(
   event,
@@ -64,22 +69,27 @@ export default async function downloadImages(
       fs.mkdirSync(downloadDir);
     }
 
-    const reqs = lists.map((url, index) => {
-      https.get(url, (res) => {
-        const stream = fs.createWriteStream(downloadDir + `${seq}-${index}.png`);
-        res.pipe(stream);
-        stream.on('finish', () => {
-          console.log(`download ${stream.path} finished!!!`);
-          stream.close();
-        });
-      }).on('finish', () => {
-
-      });
+    const promises = lists.map((url, index) => {
+      return new Promise((resolve, reject) => {
+        https
+          .get(url, (res) => {
+            const stream = fs.createWriteStream(
+              `${downloadDir}/${seq}-${index}.png`
+            );
+            res.pipe(stream);
+            stream.on('finish', () => {
+              resolve(`download ${stream.path} finished!!!`);
+              stream.close();
+            });
+          })
+          .on('error', (error) => reject(error));
+      }).catch((error) => console.error(error));
     });
 
-
+    Promise.allSettled(promises).then((results) => {
+      event.sender.send('show-finished', results);
+    });
   }
-  
+
   await browser.close();
-  event.sender.send('show-finished', );
 }

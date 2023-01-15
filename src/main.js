@@ -1,5 +1,5 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
-const { downloadImages } = require('./headless-browser');
+import { app, BrowserWindow, ipcMain } from 'electron';
+import downloadImages from './headless-browser';
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {

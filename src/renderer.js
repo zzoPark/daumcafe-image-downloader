@@ -4,38 +4,24 @@
  * Electron, visit:
  *
  * https://electronjs.org/docs/tutorial/application-architecture#main-and-renderer-processes
- *
- * By default, Node.js integration in this file is disabled. When enabling Node.js integration
- * in a renderer process, please be aware of potential security implications. You can read
- * more about security risks here:
- *
- * https://electronjs.org/docs/tutorial/security
- *
- * To enable Node.js integration in this file, open up `main.js` and enable the `nodeIntegration`
- * flag:
- *
- * ```
- *  // Create the browser window.
- *  mainWindow = new BrowserWindow({
- *    width: 800,
- *    height: 600,
- *    webPreferences: {
- *      nodeIntegration: true
- *    }
- *  });
- * ```
  */
 import './index.scss';
-
-console.log(
-  '👋 This message is being logged by "renderer.js", included via webpack'
-);
+import * as bootstrap from 'bootstrap';
 
 (() => {
-  const forms = document.querySelectorAll('.needs-validation');
+  const form = document.getElementById('form');
   const btn = document.getElementById('download');
   const spinner = btn.querySelector('.spinner-border');
-  const alertPlaceholder = document.getElementById('liveAlertPlaceholder');
+  const modalEl = document.getElementById('modal');
+  const modal = new bootstrap.Modal(modalEl);
+  const alertPlaceholder = document.getElementById('alertPlaceholder');
+
+  const createListItem = ({ value, reason }) => {
+    const li = document.createElement('li');
+    li.className = 'list-group-item';
+    li.textContent = value || reason;
+    return li;
+  };
 
   const alert = (message, type) => {
     const wrapper = document.createElement('div');
@@ -45,40 +31,71 @@ console.log(
       '   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>',
       '</div>',
     ].join('');
-
     alertPlaceholder.append(wrapper);
   };
 
-  Array.from(forms).forEach((form) => {
-    form.addEventListener(
-      'submit',
-      (event) => {
-        event.preventDefault();
-        event.stopPropagation();
+  form.addEventListener(
+    'submit',
+    (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      
+      const validity = form.checkValidity();
+      form.classList.add('was-validated');
 
-        const validity = form.checkValidity();
-        form.classList.add('was-validated');
-        if (validity) {
-          btn.disabled = true;
-          spinner.classList.remove('visually-hidden');
-          const { url, begin, end, excludeBegin, excludeEnd } = form.elements;
-          window.electronAPI.downloadImages(
-            url.value,
-            begin.value,
-            end.value,
-            excludeBegin.value,
-            excludeEnd.value
-          );
-          btn.disabled = false;
-          spinner.classList.add('visually-hidden');
-          alert(
-            '이미지 다운로드가 완료되었습니다. download 폴더에서 파일을 확인하세요.\n' +
-              '파일명은 [게시글 번호]-[순서].png 형식입니다.',
-            'success'
-          );
-        }
-      },
-      false
-    );
+      const { url, begin, end, excludeBegin, excludeEnd } = form.elements;
+
+      if (begin.value > end.value) {
+        alert('게시글 범위 시작 번호는 끝 번호보다 작아야 합니다.', 'danger');
+        begin.focus();
+      } else if (excludeBegin.value > excludeEnd.value) {
+        alert('게시글 범위 시작 번호는 끝 번호보다 작아야 합니다.', 'danger');
+        excludeBegin.focus();
+      } else if (validity) {
+        btn.disabled = true;
+        spinner.classList.remove('visually-hidden');
+        window.electronAPI.downloadImages(
+          url.value,
+          begin.value,
+          end.value,
+          excludeBegin.value,
+          excludeEnd.value
+        );
+      }
+    },
+    false
+  );
+
+  modalEl.addEventListener('shown.bs.modal', () => {
+    const navSuccessTab = document.getElementById('nav-success-tab');
+    bootstrap.Tab.getInstance(navSuccessTab).show();
+  });
+
+  modalEl.addEventListener('hide.bs.modal', () => {
+    document.querySelectorAll('#modal .list-group').forEach((element) => {
+      element.innerHTML = '';
+    });
+    document.querySelectorAll('#modal .badge').forEach((element) => {
+      element.textContent = 0;
+    });
+  });
+
+  window.electronAPI.onShowFinished((_event, results) => {
+    btn.disabled = false;
+    spinner.classList.add('visually-hidden');
+    const successList = document.querySelector('#nav-success .list-group');
+    const dangerList = document.querySelector('#nav-danger .list-group');
+    results.forEach((res) => {
+      if (res.status === 'fulfilled') {
+        successList.append(createListItem(res));
+      } else {
+        dangerList.append(createListItem(res));
+      }
+    });
+    const successBadge = document.querySelector('#modal .badge.text-bg-success');
+    const dangerBadge = document.querySelector('#modal .badge.text-bg-danger');
+    successBadge.textContent = successList.childElementCount;
+    dangerBadge.textContent = dangerList.childElementCount;
+    modal.show();
   });
 })();
