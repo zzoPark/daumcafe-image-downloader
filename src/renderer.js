@@ -98,4 +98,9 @@ import * as bootstrap from 'bootstrap';
     dangerBadge.textContent = dangerList.childElementCount;
     modal.show();
   });
+
+  window.electronAPI.onDownloadCanceled(() => {
+    btn.disabled = false;
+    spinner.classList.add('visually-hidden');
+  });
 })();

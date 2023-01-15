@@ -1,8 +1,7 @@
 import puppeteer from 'puppeteer';
 import fs from 'fs';
 import https from 'https';
-
-const downloadDir = './download';
+import { dialog } from 'electron';
 
 function createSequences(begin, end, excludes = []) {
   const seqs = [];
@@ -13,7 +12,13 @@ function createSequences(begin, end, excludes = []) {
   return seqs;
 }
 
+function getDownloadDir(window) {
+  const paths = dialog.showOpenDialogSync(window, { properties: ['openDirectory'] });
+  return paths ? paths[0] : undefined;
+}
+
 /**
+ * @param {Electron.BrowserWindow} window
  * @param {Electron.IpcMainInvokeEvent} event
  * @param {string} prefixURL
  * @param {number} begin
@@ -23,6 +28,7 @@ function createSequences(begin, end, excludes = []) {
  * @author zzoPark
  */
 export default async function downloadImages(
+  window,
   event,
   prefixURL,
   begin,
@@ -30,6 +36,13 @@ export default async function downloadImages(
   excludeBegin = 0,
   excludeEnd = 0
 ) {
+  const downloadDir = getDownloadDir(window);
+
+  if (!downloadDir) {
+    event.sender.send('cancel-download');
+    return;
+  }
+
   const browser = await puppeteer.launch({ headless: false });
   const page = await browser.newPage();
 
@@ -70,23 +83,22 @@ export default async function downloadImages(
     }
 
     const promises = lists.map((url, index) => {
+      const filePath = `${downloadDir}/${seq}-${index}.png`;
       return new Promise((resolve, reject) => {
         https
           .get(url, (res) => {
-            const stream = fs.createWriteStream(
-              `${downloadDir}/${seq}-${index}.png`
-            );
+            const stream = fs.createWriteStream(filePath);
             res.pipe(stream);
             stream.on('finish', () => {
-              resolve(`download ${stream.path} finished!!!`);
               stream.close();
+              resolve(filePath);
             });
           })
-          .on('error', (error) => reject(error));
+          .on('error', (error) => reject(`${filePath}: ${error.message}`));
       }).catch((error) => console.error(error));
     });
 
-    Promise.allSettled(promises).then((results) => {
+    await Promise.allSettled(promises).then((results) => {
       event.sender.send('show-finished', results);
     });
   }
