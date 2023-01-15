@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>다음 카페 댓글 이미지 다운로더</title>
+  </head>
+  <body>
+    <form class="container-fluid needs-validation" novalidate>
+      <fieldset class="m-3">
+        <label class="form-label">게시판 주소를 붙여넣으세요.</label>
+        <input name="url" type="text" class="form-control" placeholder="https://cafe.daum.net/SHINeemusic0525/example" autofocus required>
+        <div class="invalid-feedback">필수 입력</div>
+      </fieldset>
+      <fieldset class="m-3">
+        <label class="form-label">댓글 이미지를 다운받을 게시글 번호 범위를 입력하세요.</label>
+        <div class="row">
+          <div class="col-auto">
+            <input name="begin" class="form-control" type="number" min="1" placeholder="1" required>
+            <div class="invalid-feedback">필수 입력</div>
+          </div>
+          <div class="col-auto">~</div>
+          <div class="col-auto">
+            <input name="end" class="form-control" type="number" min="1" placeholder="100" required>
+            <div class="invalid-feedback">필수 입력</div>
+          </div>
+        </div>
+      </fieldset>
+      <fieldset class="m-3">
+        <label class="form-label">다운로드에서 제외할 게시글 번호 범위를 입력하세요.</label>
+        <div class="row">
+          <div class="col-auto"><input name="excludeBegin" class="form-control" type="number" min="1" placeholder="10"></div>
+          <div class="col-auto">~</div>
+          <div class="col-auto"><input name="excludeEnd" class="form-control" type="number" min="1" placeholder="20"></div>
+        </div>
+      </fieldset>
+      <fieldset class="m-3">
+        <div id="liveAlertPlaceholder"></div>
+        <button id="download" class="btn btn-primary" type="submit">
+          <span class="spinner-border spinner-border-sm visually-hidden" role="status" aria-hidden="true"></span>
+          다운로드 시작
+        </button>
+      </fieldset>
+    </form>
+  </body>
+</html>
