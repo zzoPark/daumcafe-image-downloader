@@ -1,4 +1,3 @@
-import puppeteer from 'puppeteer';
 import fs from 'fs';
 import https from 'https';
 import { dialog } from 'electron';
@@ -15,6 +14,18 @@ function createSequences(begin, end, excludes = []) {
 function getDownloadDir(window) {
   const paths = dialog.showOpenDialogSync(window, { properties: ['openDirectory'] });
   return paths ? paths[0] : undefined;
+}
+
+async function getChromiumPath() {
+  const fetcher = puppeteer.createBrowserFetcher();
+  const localRevisions = fetcher.localRevisions();
+  for (const i in localRevisions) {
+    const revision = localRevisions[i];
+    if (fetcher.canDownload(revision)) {
+      const revisionInfo = await fetcher.download(revision);
+      return revisionInfo.executablePath;
+    }
+  }
 }
 
 /**
@@ -43,7 +54,15 @@ export default async function downloadImages(
     return;
   }
 
-  const browser = await puppeteer.launch({ headless: false });
+  window.addBrowserView();
+
+  // load login page
+  await window.loadURL('https://accounts.kakao.com/');
+
+  const browser = await puppeteer.launch({ 
+    headless: false,
+    executablePath: executablePath,
+  });
   const page = await browser.newPage();
 
   await page.goto(prefixURL, { waitUntil: 'networkidle2' });
