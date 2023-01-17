@@ -105,4 +105,8 @@ import * as bootstrap from 'bootstrap';
     btn.disabled = false;
     spinner.classList.add('visually-hidden');
   });
+
+  window.electronAPI.onConsoleLog((_event, message) => {
+    console.log('electron ===', message);
+  });
 })();

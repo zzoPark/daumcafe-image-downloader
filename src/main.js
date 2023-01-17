@@ -17,6 +17,9 @@ const createWindow = () => {
   });
 
   ipcMain.handle('download-images', downloadImages.bind(null, mainWindow));
+  ipcMain.handle('dirname', () => __dirname);
+  ipcMain.handle('get-app-path', () => app.getAppPath());
+  ipcMain.handle('get-path', (_event, name) => app.getPath(name));
 
   // and load the index.html of the app.
   mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
