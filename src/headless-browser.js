@@ -4,6 +4,13 @@ import puppeteer from 'puppeteer';
 import { dialog, app } from 'electron';
 import { join, dirname } from 'path';
 
+/**
+ * 숫자 범위의 시작과 끝을 입력받아서 숫자 목록 반환
+ * @param {number} begin 범위 시작
+ * @param {number} end 범위 끝
+ * @param {number[]} excludes 범위에서 제외할 숫자 목록
+ * @returns 범위 시작과 끝을 포함하는 수열
+ */
 function createSequences(begin, end, excludes = []) {
   const seqs = [];
   for (let seq = begin; seq <= end; seq++) {
@@ -13,6 +20,11 @@ function createSequences(begin, end, excludes = []) {
   return seqs;
 }
 
+/**
+ * 이미지를 다운로드 받을 폴더 선택
+ * @param {Electron.BrowserWindow} window 
+ * @returns 선택한 폴더 경로
+ */
 function getDownloadDir(window) {
   try {
     const paths = dialog.showOpenDialogSync(window, {
@@ -25,6 +37,11 @@ function getDownloadDir(window) {
   }
 }
 
+/**
+ * puppeteer를 통해 브라우저 창 열기
+ * @param {function} consoleLog console logging function
+ * @returns 열린 브라우저
+ */
 async function getBrowser(consoleLog) {
   try {
     const browser = await puppeteer.launch({
@@ -53,7 +70,6 @@ function getChromiumExecPath(consoleLog) {
 
 /**
  * Download Daum Cafe board reply image files.
- * 
  * @param {Electron.BrowserWindow} window application browser window
  * @param {Electron.IpcMainInvokeEvent} event ipcMain event
  * @param {string} prefixURL daumcafe board url

@@ -1,3 +1,3 @@
 # daumcafe-image-downloader
 
-개인 프로젝트
+다음 카페 게시판 댓글 이미지 일괄 다운로드 프로그램
