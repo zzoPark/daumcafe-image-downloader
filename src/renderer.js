@@ -54,13 +54,15 @@ import * as bootstrap from 'bootstrap';
       } else if (validity) {
         btn.disabled = true;
         spinner.classList.remove('visually-hidden');
-        window.electronAPI.downloadImages(
-          url.value,
-          begin.value,
-          end.value,
-          excludeBegin.value,
-          excludeEnd.value
-        );
+        
+
+        // window.electronAPI.downloadImages(
+        //   url.value,
+        //   begin.value,
+        //   end.value,
+        //   excludeBegin.value,
+        //   excludeEnd.value
+        // );
       }
     },
     false

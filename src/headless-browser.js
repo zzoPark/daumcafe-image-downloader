@@ -1,4 +1,3 @@
-import puppeteer from 'puppeteer';
 import fs from 'fs';
 import https from 'https';
 import { dialog } from 'electron';
@@ -43,6 +42,18 @@ function getChromiumExecPath(consoleLog) {
   return puppeteer
     .executablePath()
     .replace('.cache', join('resources', '.cache'));
+}
+
+async function getChromiumPath() {
+  const fetcher = puppeteer.createBrowserFetcher();
+  const localRevisions = fetcher.localRevisions();
+  for (const i in localRevisions) {
+    const revision = localRevisions[i];
+    if (fetcher.canDownload(revision)) {
+      const revisionInfo = await fetcher.download(revision);
+      return revisionInfo.executablePath;
+    }
+  }
 }
 
 /**
