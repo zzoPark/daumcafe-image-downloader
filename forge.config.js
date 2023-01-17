@@ -1,5 +1,9 @@
+const { join } = require('path');
+
 module.exports = {
-  packagerConfig: {},
+  packagerConfig: {
+    extraResource: join(__dirname, '.cache'),
+  },
   rebuildConfig: {},
   makers: [
     {
