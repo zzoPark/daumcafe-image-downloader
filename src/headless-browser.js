@@ -1,7 +1,8 @@
 import fs from 'fs';
 import https from 'https';
-import { dialog } from 'electron';
-import { join } from 'path';
+import puppeteer from 'puppeteer';
+import { dialog, app } from 'electron';
+import { join, dirname } from 'path';
 
 function createSequences(begin, end, excludes = []) {
   const seqs = [];
@@ -37,34 +38,29 @@ async function getBrowser(consoleLog) {
   }
 }
 
+/**
+ * @param {function} consoleLog console logging function
+ * @returns chromium executable path
+ */
 function getChromiumExecPath(consoleLog) {
-  consoleLog(PUPPETEER_CACHE_DIR);
-  return puppeteer
-    .executablePath()
-    .replace('.cache', join('resources', '.cache'));
-}
-
-async function getChromiumPath() {
-  const fetcher = puppeteer.createBrowserFetcher();
-  const localRevisions = fetcher.localRevisions();
-  for (const i in localRevisions) {
-    const revision = localRevisions[i];
-    if (fetcher.canDownload(revision)) {
-      const revisionInfo = await fetcher.download(revision);
-      return revisionInfo.executablePath;
-    }
-  }
+  let executablePath = puppeteer.executablePath();
+  const splitPath = executablePath.split(join('.cache', 'puppeteer'), 2);
+  const moduleDir = dirname(app.getPath('module'));
+  executablePath = join(moduleDir, 'resources', '.cache', 'puppeteer', splitPath[1]);
+  consoleLog(executablePath);
+  return executablePath;
 }
 
 /**
- * @param {Electron.BrowserWindow} window
- * @param {Electron.IpcMainInvokeEvent} event
- * @param {string} prefixURL
- * @param {number} begin
- * @param {number} end
- * @param {number} excludeBegin
- * @param {number} excludeEnd
- * @author zzoPark
+ * Download Daum Cafe board reply image files.
+ * 
+ * @param {Electron.BrowserWindow} window application browser window
+ * @param {Electron.IpcMainInvokeEvent} event ipcMain event
+ * @param {string} prefixURL daumcafe board url
+ * @param {number} begin begin of article no. range
+ * @param {number} end end of article no. range
+ * @param {number} excludeBegin begin of article no. exclude range
+ * @param {number} excludeEnd end of article no. exclude range
  */
 export default async function downloadImages(
   window,
