@@ -60,10 +60,8 @@ async function getBrowser(consoleLog) {
  * @returns chromium executable path
  */
 function getChromiumExecPath(consoleLog) {
-  let executablePath = puppeteer.executablePath();
-  const splitPath = executablePath.split(join('.cache', 'puppeteer'), 2);
   const moduleDir = dirname(app.getPath('module'));
-  executablePath = join(moduleDir, 'resources', '.cache', 'puppeteer', splitPath[1]);
+  const executablePath = join(moduleDir, 'resources', '.cache', 'puppeteer', 'chrome', 'win64-1069273', 'chrome-win', 'chrome.exe');
   consoleLog(executablePath);
   return executablePath;
 }
